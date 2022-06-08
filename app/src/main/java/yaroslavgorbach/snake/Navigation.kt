@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import yaroslavgorbach.snake.presentation.game.GameScreen
 import yaroslavgorbach.snake.presentation.menu.MenuScreen
+import yaroslavgorbach.snake.presentation.score.HighScoreScreen
 
 
 sealed class Screen(val route: String) {
@@ -64,6 +65,8 @@ private fun NavGraphBuilder.addMenu(
     composable(LeafScreen.Menu.createRoute(root)) {
         MenuScreen(navigateToGame = {
             navController.navigate(LeafScreen.Game.createRoute(root))
+        }, navigateToHighScore = {
+            navController.navigate(LeafScreen.HighScores.createRoute(root))
         })
     }
 }
@@ -82,7 +85,7 @@ private fun NavGraphBuilder.addHighScores(
     root: Screen,
 ) {
     composable(LeafScreen.HighScores.createRoute(root)) {
-
+        HighScoreScreen()
     }
 }
 

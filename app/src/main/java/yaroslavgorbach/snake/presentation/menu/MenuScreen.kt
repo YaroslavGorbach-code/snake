@@ -13,7 +13,7 @@ import yaroslavgorbach.snake.presentation.common.ui.AppButton
 import yaroslavgorbach.snake.presentation.common.ui.DisplayLarge
 
 @Composable
-fun MenuScreen(navigateToGame: ()->Unit) {
+fun MenuScreen(navigateToGame: () -> Unit, navigateToHighScore: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -38,7 +38,7 @@ fun MenuScreen(navigateToGame: ()->Unit) {
             modifier = Modifier.width(248.dp),
             text = stringResource(id = R.string.high_score)
         ) {
-            // TODO: navigate to HighScores
+            navigateToHighScore()
         }
 
         AppButton(modifier = Modifier.width(248.dp), text = stringResource(R.string.settings)) {

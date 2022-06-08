@@ -9,13 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yaroslavgorbach.snake.data.GameCache
+import yaroslavgorbach.snake.data.model.HighScore
 import yaroslavgorbach.snake.domain.game.GameEngine
 import yaroslavgorbach.snake.presentation.game.model.GameActions
 import yaroslavgorbach.snake.presentation.game.model.GameViewState
 import javax.inject.Inject
 
 @HiltViewModel
-class GameViewModel @Inject constructor(val dataStore: GameCache) : ViewModel() {
+class GameViewModel @Inject constructor(private val dataStore: GameCache) : ViewModel() {
 
     private val pendingActions = MutableSharedFlow<GameActions>()
 
@@ -25,6 +26,9 @@ class GameViewModel @Inject constructor(val dataStore: GameCache) : ViewModel() 
         get() = _state
 
     private val gameEngine: GameEngine = GameEngine(viewModelScope, onGameEnded = {
+        viewModelScope.launch {
+            dataStore.saveHighScore(HighScore(state.value.playerName, state.value.score))
+        }
         _state.update { it.copy(isFinish = true) }
     }, onFoodEaten = {
         _state.update { it.copy(score = it.score.inc()) }
