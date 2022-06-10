@@ -36,7 +36,7 @@ class GameViewModel @Inject constructor(private val dataStore: GameCache) : View
 
     init {
         viewModelScope.launch {
-            dataStore.getPlayerName.collect() { name ->
+            dataStore.getPlayerName.collect { name ->
                 _state.update { it.copy(playerName = name) }
             }
         }
@@ -46,6 +46,10 @@ class GameViewModel @Inject constructor(private val dataStore: GameCache) : View
                 when (action) {
                     is GameActions.Move -> {
                         gameEngine.move = action.pair
+                    }
+                    is GameActions.TryAgain -> {
+                        gameEngine.startGame()
+                        _state.emit(GameViewState())
                     }
                 }
             }

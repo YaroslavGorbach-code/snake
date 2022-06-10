@@ -1,12 +1,11 @@
 package yaroslavgorbach.snake.domain.game
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import yaroslavgorbach.snake.data.model.GameState
@@ -36,7 +35,9 @@ class GameEngine(
 
     private val currentDirection = mutableStateOf(SnakeDirection.RIGHT)
 
-    var move = Pair(1,0)
+    private val gameJob: Job = startGame()
+
+    var move = Pair(1, 0)
         set(value) {
             scope.launch {
                 mutex.withLock {
@@ -45,35 +46,32 @@ class GameEngine(
             }
         }
 
-    fun reset() {
+    private fun reset() {
         mutableState.update { startGameState }
         currentDirection.value = SnakeDirection.RIGHT
         move = Pair(1, 0)
     }
 
-    init {
-        scope.launch {
+    suspend fun stop() {
+        gameJob.cancelAndJoin()
+    }
+
+    fun startGame(): Job {
+        reset()
+        return scope.launch {
             var snakeLength = 2
 
-            while (true) {
+            while (isActive) {
                 delay(150)
 
+                Log.i("dssddfsd", mutableState.value.snake.first().toString())
                 mutableState.update {
-                    val hasReachedLeftEnd = it.snake.first().first == 0 &&
-                            it.currentDirection == SnakeDirection.LEFT
+                    val hasReachedVerticalBorder = it.snake.first().second == BOARD_SIZE.dec()
+                    val hasReachedHorizontalBorder = it.snake.first().first == BOARD_SIZE.dec()
 
-                    val hasReachedTopEnd = it.snake.first().second == 0 &&
-                            it.currentDirection == SnakeDirection.UP
-
-                    val hasReachedRightEnd = it.snake.first().first == BOARD_SIZE - 1 &&
-                            it.currentDirection == SnakeDirection.RIGHT
-
-                    val hasReachedBottomEnd = it.snake.first().second == BOARD_SIZE - 1 &&
-                            it.currentDirection == SnakeDirection.DOWN
-
-                    if (hasReachedLeftEnd || hasReachedTopEnd || hasReachedRightEnd || hasReachedBottomEnd) {
-                        snakeLength = 2
+                    if (hasReachedHorizontalBorder || hasReachedVerticalBorder) {
                         onGameEnded.invoke()
+                        stop()
                     }
 
                     if (move.first == 0 && move.second == -1) {
@@ -101,8 +99,8 @@ class GameEngine(
                     }
 
                     if (it.snake.contains(newPosition)) {
-                        snakeLength = 2
                         onGameEnded.invoke()
+                        stop()
                     }
 
                     it.copy(
