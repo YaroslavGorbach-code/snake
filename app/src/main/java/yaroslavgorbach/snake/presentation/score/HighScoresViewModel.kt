@@ -32,7 +32,6 @@ class HighScoresViewModel @Inject constructor(private val gameCache: GameCache) 
                 _state.update { it.copy(highScores = scores) }
             }
         }
-
     }
 
     fun submitAction(action: HighScoresActions) {
