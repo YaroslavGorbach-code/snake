@@ -1,7 +1,6 @@
 package yaroslavgorbach.snake.domain.game
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,9 +32,7 @@ class GameEngine(
 
     val gameState: Flow<GameState> = mutableState
 
-    private val currentDirection = mutableStateOf(SnakeDirection.RIGHT)
-
-    private val gameJob: Job = startGame()
+    private var gameJob: Job? = null
 
     var move = Pair(1, 0)
         set(value) {
@@ -46,73 +43,102 @@ class GameEngine(
             }
         }
 
-    private fun reset() {
-        mutableState.update { startGameState }
-        currentDirection.value = SnakeDirection.RIGHT
+    init {
+        startGame()
+    }
+
+    suspend fun reset() {
+        mutableState.emit(startGameState)
         move = Pair(1, 0)
     }
 
     suspend fun stop() {
-        gameJob.cancelAndJoin()
+        gameJob?.cancelAndJoin()
     }
 
-    fun startGame(): Job {
-        reset()
-        return scope.launch {
+    fun startGame() {
+        gameJob = scope.launch {
+            reset()
+
             var snakeLength = 2
 
             while (isActive) {
                 delay(150)
 
-                Log.i("dssddfsd", mutableState.value.snake.first().toString())
                 mutableState.update {
-                    val hasReachedVerticalBorder = it.snake.first().second == BOARD_SIZE.dec()
-                    val hasReachedHorizontalBorder = it.snake.first().first == BOARD_SIZE.dec()
+                    checkReachedBorder(it)
+                    calculateCurrentDirection(move)
 
-                    if (hasReachedHorizontalBorder || hasReachedVerticalBorder) {
-                        onGameEnded.invoke()
-                        stop()
-                    }
-
-                    if (move.first == 0 && move.second == -1) {
-                        currentDirection.value = SnakeDirection.UP
-                    } else if (move.first == -1 && move.second == 0) {
-                        currentDirection.value = SnakeDirection.LEFT
-                    } else if (move.first == 1 && move.second == 0) {
-                        currentDirection.value = SnakeDirection.RIGHT
-                    } else if (move.first == 0 && move.second == 1) {
-                        currentDirection.value = SnakeDirection.DOWN
-                    }
-
-                    val newPosition = it.snake.first().let { poz ->
-                        mutex.withLock {
-                            Pair(
-                                (poz.first + move.first + BOARD_SIZE) % BOARD_SIZE,
-                                (poz.second + move.second + BOARD_SIZE) % BOARD_SIZE
-                            )
-                        }
-                    }
-
+                    val newPosition = getNewPosition(it)
                     if (newPosition == it.food) {
                         onFoodEaten.invoke()
                         snakeLength++
                     }
-
                     if (it.snake.contains(newPosition)) {
                         onGameEnded.invoke()
                         stop()
                     }
 
                     it.copy(
-                        food = if (newPosition == it.food) Pair(
-                            Random().nextInt(BOARD_SIZE),
-                            Random().nextInt(BOARD_SIZE)
-                        ) else it.food,
+                        food = calculateFoodPosition(newPosition, it),
                         snake = listOf(newPosition) + it.snake.take(snakeLength - 1),
-                        currentDirection = currentDirection.value,
+                        currentDirection = calculateCurrentDirection(move),
                     )
                 }
             }
         }
+    }
+
+    private suspend fun checkReachedBorder(it: GameState) {
+        val hasReachedLeftEnd = it.snake.first().first == BOARD_SIZE &&
+                it.currentDirection == SnakeDirection.LEFT
+
+        val hasReachedTopEnd = it.snake.first().second == 0 &&
+                it.currentDirection == SnakeDirection.UP
+
+        val hasReachedRightEnd = it.snake.first().first == 0 &&
+                it.currentDirection == SnakeDirection.RIGHT
+
+        val hasReachedBottomEnd = it.snake.first().second == BOARD_SIZE &&
+                it.currentDirection == SnakeDirection.DOWN
+
+        if (hasReachedLeftEnd || hasReachedTopEnd || hasReachedRightEnd || hasReachedBottomEnd) {
+            onGameEnded.invoke()
+            stop()
+        }
+    }
+
+    private suspend fun getNewPosition(it: GameState): Pair<Int, Int> {
+        return it.snake.first().let { poz ->
+            Pair(
+                (poz.first + move.first + BOARD_SIZE) % BOARD_SIZE,
+                (poz.second + move.second + BOARD_SIZE) % BOARD_SIZE
+            )
+
+        }
+    }
+
+    private fun calculateFoodPosition(
+        newPosition: Pair<Int, Int>,
+        it: GameState
+    ) = if (newPosition == it.food) Pair(
+        Random().nextInt(BOARD_SIZE),
+        Random().nextInt(BOARD_SIZE)
+    ) else it.food
+
+    private fun calculateCurrentDirection(move: Pair<Int, Int>): SnakeDirection {
+        if (move.first == 0 && move.second == -1) {
+            return SnakeDirection.UP
+        }
+        if (move.first == -1 && move.second == 0) {
+            return SnakeDirection.LEFT
+        }
+        if (move.first == 1 && move.second == 0) {
+            return SnakeDirection.RIGHT
+        }
+        if (move.first == 0 && move.second == 1) {
+            return SnakeDirection.DOWN
+        }
+        return SnakeDirection.RIGHT
     }
 }

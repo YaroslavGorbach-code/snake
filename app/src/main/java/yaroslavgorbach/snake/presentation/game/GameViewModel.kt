@@ -1,5 +1,6 @@
 package yaroslavgorbach.snake.presentation.game
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,7 @@ class GameViewModel @Inject constructor(private val dataStore: GameCache) : View
     private val gameEngine: GameEngine = GameEngine(viewModelScope, onGameEnded = {
         viewModelScope.launch {
             dataStore.saveHighScore(HighScore(state.value.playerName, state.value.score))
+            Log.i("dssdsd", "end")
         }
         _state.update { it.copy(isFinish = true) }
     }, onFoodEaten = {
@@ -48,8 +50,8 @@ class GameViewModel @Inject constructor(private val dataStore: GameCache) : View
                         gameEngine.move = action.pair
                     }
                     is GameActions.TryAgain -> {
-                        gameEngine.startGame()
                         _state.emit(GameViewState())
+                        gameEngine.startGame()
                     }
                 }
             }
@@ -67,5 +69,4 @@ class GameViewModel @Inject constructor(private val dataStore: GameCache) : View
             pendingActions.emit(action)
         }
     }
-
 }
