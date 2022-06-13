@@ -1,6 +1,7 @@
 package yaroslavgorbach.snake.domain.game
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
