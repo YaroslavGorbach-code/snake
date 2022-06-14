@@ -1,7 +1,6 @@
 package yaroslavgorbach.snake.domain.game
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +22,7 @@ class GameEngine(
 
     private val startGameState = GameState(
         food = Pair(5, 5),
-        snake = listOf(Pair(7, 7)),
+        snake = listOf(Pair(7, 7), Pair(7, 7)),
         currentDirection = SnakeDirection.RIGHT
     )
 
@@ -91,17 +90,20 @@ class GameEngine(
     }
 
     private suspend fun checkReachedBorder(it: GameState) {
-        val hasReachedLeftEnd = it.snake.first().first == BOARD_SIZE &&
-                it.currentDirection == SnakeDirection.LEFT
+        val hasReachedLeftEnd = it.snake[1].first == 0
+                && it.currentDirection == SnakeDirection.LEFT
 
-        val hasReachedTopEnd = it.snake.first().second == 0 &&
-                it.currentDirection == SnakeDirection.UP
+        val hasReachedTopEnd = it.snake[1].second == 0
+                && it.currentDirection == SnakeDirection.UP
 
-        val hasReachedRightEnd = it.snake.first().first == 0 &&
-                it.currentDirection == SnakeDirection.RIGHT
+        val hasReachedRightEnd = it.snake[1].first == BOARD_SIZE.dec()
+                && it.currentDirection == SnakeDirection.RIGHT
 
-        val hasReachedBottomEnd = it.snake.first().second == BOARD_SIZE &&
-                it.currentDirection == SnakeDirection.DOWN
+        val hasReachedBottomEnd = it.snake[1].second == BOARD_SIZE.dec()
+                && it.currentDirection == SnakeDirection.DOWN
+
+        Log.i("dssds", it.snake[1].second.toString())
+
 
         if (hasReachedLeftEnd || hasReachedTopEnd || hasReachedRightEnd || hasReachedBottomEnd) {
             onGameEnded.invoke()
@@ -137,9 +139,6 @@ class GameEngine(
         if (move.first == 1 && move.second == 0) {
             return SnakeDirection.RIGHT
         }
-        if (move.first == 0 && move.second == 1) {
-            return SnakeDirection.DOWN
-        }
-        return SnakeDirection.RIGHT
+        return SnakeDirection.DOWN
     }
 }
