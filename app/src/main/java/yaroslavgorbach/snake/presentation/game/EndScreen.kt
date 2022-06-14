@@ -17,9 +17,9 @@ import yaroslavgorbach.snake.presentation.common.ui.DisplayLarge
 import yaroslavgorbach.snake.presentation.common.ui.TitleLarge
 
 @Composable
-fun EndScreen(score: Int, onTryAgain: () -> Unit) {
+fun EndScreen(score: Int, onTryAgain: () -> Unit, onBack: () -> Unit) {
 
-    AppBar(title = "", onBackClicked = { }) { contentPadding ->
+    AppBar(title = "", onBackClicked = { onBack() }) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

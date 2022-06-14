@@ -17,20 +17,24 @@ import yaroslavgorbach.snake.presentation.game.model.GameActions
 import yaroslavgorbach.snake.presentation.game.model.GameViewState
 
 @Composable
-fun GameScreen() {
+fun GameScreen(onBack: () -> Unit) {
     val viewModel: GameViewModel = hiltViewModel()
-    GameScreen(viewModel, actioner = viewModel::submitAction)
+    GameScreen(viewModel, onBack = onBack, actioner = viewModel::submitAction)
 }
 
 @Composable
-fun GameScreen(viewModel: GameViewModel, actioner: (GameActions) -> Unit) {
+fun GameScreen(viewModel: GameViewModel, actioner: (GameActions) -> Unit, onBack: () -> Unit) {
     val state = viewModel.state.collectAsState().value
     if (state.isFinish) {
-        EndScreen(score = state.score, onTryAgain = { actioner(GameActions.TryAgain) })
+        EndScreen(
+            score = state.score,
+            onTryAgain = { actioner(GameActions.TryAgain) },
+            onBack = onBack
+        )
     } else {
         AppBar(
             title = stringResource(id = R.string.your_score, state.score),
-            onBackClicked = {}) { contentPadding ->
+            onBackClicked = { onBack() }) { contentPadding ->
             Column(
                 modifier = Modifier.padding(contentPadding),
                 horizontalAlignment = Alignment.CenterHorizontally

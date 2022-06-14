@@ -101,9 +101,7 @@ class GameEngine(
 
         val hasReachedBottomEnd = it.snake[1].second == BOARD_SIZE.dec()
                 && it.currentDirection == SnakeDirection.DOWN
-
-        Log.i("dssds", it.snake[1].second.toString())
-
+        
 
         if (hasReachedLeftEnd || hasReachedTopEnd || hasReachedRightEnd || hasReachedBottomEnd) {
             onGameEnded.invoke()

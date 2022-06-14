@@ -43,7 +43,7 @@ fun SettingScreen(
     val context = LocalContext.current
     AppBar(
         title = stringResource(R.string.title_settings),
-        onBackClicked = { }) {
+        onBackClicked = { onBack() }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

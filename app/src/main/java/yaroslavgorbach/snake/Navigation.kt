@@ -26,7 +26,6 @@ private sealed class LeafScreen(
     object Menu : LeafScreen("Menu")
     object HighScores : LeafScreen("HighScores")
     object Settings : LeafScreen("Settings")
-    object About : LeafScreen("About")
     object Game : LeafScreen("Game")
 }
 
@@ -78,7 +77,9 @@ private fun NavGraphBuilder.addGame(
     root: Screen,
 ) {
     composable(LeafScreen.Game.createRoute(root)) {
-        GameScreen()
+        GameScreen(onBack = {
+            navController.popBackStack()
+        })
     }
 }
 
@@ -87,7 +88,9 @@ private fun NavGraphBuilder.addHighScores(
     root: Screen,
 ) {
     composable(LeafScreen.HighScores.createRoute(root)) {
-        HighScoreScreen()
+        HighScoreScreen(onBack = {
+            navController.popBackStack()
+        })
     }
 }
 

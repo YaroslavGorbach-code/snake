@@ -29,7 +29,6 @@ class GameViewModel @Inject constructor(private val dataStore: GameCache) : View
     private val gameEngine: GameEngine = GameEngine(viewModelScope, onGameEnded = {
         viewModelScope.launch {
             dataStore.saveHighScore(HighScore(state.value.playerName, state.value.score))
-            Log.i("dssdsd", "end")
         }
         _state.update { it.copy(isFinish = true) }
     }, onFoodEaten = {

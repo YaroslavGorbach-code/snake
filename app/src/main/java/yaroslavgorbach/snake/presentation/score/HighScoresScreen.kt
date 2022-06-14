@@ -18,19 +18,19 @@ import yaroslavgorbach.snake.presentation.common.ui.AppBar
 import yaroslavgorbach.snake.presentation.common.ui.TitleLarge
 
 @Composable
-fun HighScoreScreen() {
+fun HighScoreScreen(onBack: () -> Unit) {
     val viewMode: HighScoresViewModel = hiltViewModel()
 
-    HighScoreScreen(viewMode)
+    HighScoreScreen(viewMode, onBack = onBack)
 }
 
 @Composable
-fun HighScoreScreen(viewModel: HighScoresViewModel = hiltViewModel()) {
+fun HighScoreScreen(viewModel: HighScoresViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state = viewModel.state.collectAsState()
 
     AppBar(
         title = stringResource(R.string.high_score),
-        onBackClicked = { }) { contentPadding ->
+        onBackClicked = { onBack() }) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
