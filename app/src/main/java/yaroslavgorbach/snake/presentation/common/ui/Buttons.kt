@@ -26,7 +26,7 @@ fun AppIconButton(modifier: Modifier = Modifier, icon: ImageVector, onClick: () 
     IconButton(
         onClick = onClick,
         modifier = modifier
-            .size(64.dp)
+            .size(84.dp)
             .background(
                 color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(4.dp)

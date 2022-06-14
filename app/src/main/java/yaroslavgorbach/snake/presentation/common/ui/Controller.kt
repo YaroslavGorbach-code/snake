@@ -16,7 +16,7 @@ import yaroslavgorbach.snake.domain.game.SnakeDirection
 
 @Composable
 fun Controller(onDirectionChange: (SnakeDirection) -> Unit) {
-    val buttonSize = Modifier.size(64.dp)
+    val buttonSize = Modifier.size(84.dp)
 
     val currentDirection = remember { mutableStateOf(SnakeDirection.RIGHT) }
 
